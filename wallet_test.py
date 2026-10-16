@@ -37,7 +37,7 @@ def firmar_json_a_jwt():
                 "hexBackgroundColor": "#1B3022",  # Fondo verde oscuro de tu diseño
                 "logo": {
                     "sourceUri": {
-                        "uri": "https://tuservidor.com/images/logo_andora.png"
+                        "uri": {"uri": URL_LOGO_GITHUB}
                     },
                     "contentDescription": {
                         "defaultValue": {
@@ -48,7 +48,7 @@ def firmar_json_a_jwt():
                 },
                 "heroImage": {
                     "sourceUri": {
-                        "uri": "https://tuservidor.com/images/avatar_j_andora.png"
+                        "uri": {"uri": URL_HERO_GITHUB}
                     },
                     "contentDescription": {
                         "defaultValue": {
