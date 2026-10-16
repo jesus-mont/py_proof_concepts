@@ -1,0 +1,30 @@
+Date: 13/10/2026
+Time: 15:7
+Phone Number: +526142834064
+Image: C:\Users\jesus\IdeaProjects\test\pikachu.png
+Caption: prueba de envio de iamgen por whatsapp
+--------------------
+Date: 13/10/2026
+Time: 15:9
+Phone Number: +526142834064
+Image: C:\Users\jesus\IdeaProjects\test\pikachu.png
+Caption: prueba de envio de iamgen por whatsapp
+--------------------
+Date: 13/10/2026
+Time: 15:11
+Phone Number: +526145021886
+Image: C:\Users\jesus\IdeaProjects\test\pikachu.png
+Caption: prueba de envio de imagen por whatsapp
+--------------------
+Date: 13/10/2026
+Time: 15:12
+Phone Number: +526144476660
+Image: C:\Users\jesus\IdeaProjects\test\pikachu.png
+Caption: prueba de envio de imagen por whatsapp
+--------------------
+Date: 13/10/2026
+Time: 15:14
+Phone Number: +526361289418
+Image: C:\Users\jesus\IdeaProjects\test\pikachu.png
+Caption: prueba de envio de imagen por whatsapp automatico
+--------------------
