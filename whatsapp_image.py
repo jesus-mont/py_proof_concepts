@@ -1,119 +1,47 @@
-import json
-import google.auth
-import google.auth.crypt
-import google.auth.jwt
-from google.oauth2 import service_account
-import pywhatkit as pwk
+import os
+import time
+import pywhatkit as kit
+import requests
 
-# ==========================================
-# CONFIGURACIÓN
-# ==========================================
-CREDENTIALS_FILE = "credentials.json"  # Tu archivo de credenciales de Google Cloud
-ISSUER_ID = "3388000000000000000"  # Tu Issuer ID de Google Wallet
-DESTINATARIO = "+521234567890"  # Número de teléfono del destinatario con código de país
+# 1. Obtener los datos de Pikachu desde PokéAPI
+url_api = "https://pokeapi.co/api/v2/pokemon/pikachu"
+respuesta = requests.get(url_api)
 
+if respuesta.status_code == 200:
+    data = respuesta.json()
 
-def firmar_json_a_jwt():
-    # 1. Cargar las credenciales de servicio de Google Cloud
-    credentials = service_account.Credentials.from_service_account_file(
-        CREDENTIALS_FILE,
-        scopes=["https://www.googleapis.com/auth/wallet_object.issuer"],
+    # Extraer la URL de la imagen (Sprite oficial)
+    imagen_url = data["sprites"]["other"]["official-artwork"]["front_default"]
+
+    # 2. Descargar la imagen y guardarla localmente
+    nombre_archivo = "pikachu.png"
+    img_data = requests.get(imagen_url).content
+
+    with open(nombre_archivo, "wb") as f:
+        f.write(img_data)
+
+    print("✅ Imagen de Pikachu descargada correctamente.")
+
+    # 3. Configurar el envío por WhatsApp
+    # Formato internacional del número: +[Código de país][Número de teléfono]
+    numero_destino = "+521234567890"  # Reemplaza con el número real
+    mensaje_texto = "¡Hola! Aquí tienes la imagen oficial de Pikachu desde PokéAPI ⚡"
+
+    # Obtener la ruta absoluta de la imagen (requerido por pywhatkit)
+    ruta_absoluta = os.path.abspath(nombre_archivo)
+
+    print("⏳ Abriendo WhatsApp Web para enviar el mensaje...")
+
+    # Enviar la imagen
+    # pywhatkit abrirá el navegador y enviará la imagen después del tiempo indicado
+    kit.sendwhats_image(
+        receiver=numero_destino,
+        img_path=ruta_absoluta,
+        caption=mensaje_texto,
+        wait_time=15,  # Tiempo en segundos para esperar a que cargue WhatsApp Web
+        tab_close=True,  # Cierra la pestaña del navegador al terminar
     )
 
-    # Tu JSON específico que se codificará dentro del código QR
-    contenido_qr = {"a": 26, "v": 1, "t": 1}
-
-    # 2. Estructura del pase personalizado con tu diseño y el QR integrado
-    tu_json_personalizado = {
-        "iss": credentials.service_account_email,
-        "aud": "google",
-        "typ": "savetowallet",
-        "payload": {
-            "genericObjects": [{
-                "id": f"{ISSUER_ID}.andora_jesus_22",
-                "classId": f"{ISSUER_ID}.andora_pase_clase",
-                "state": "ACTIVE",
-                "hexBackgroundColor": "#1B3022",  # Fondo verde oscuro de tu diseño
-                "logo": {
-                    "sourceUri": {
-                        "uri": "https://tuservidor.com/images/logo_andora.png"
-                    },
-                    "contentDescription": {
-                        "defaultValue": {
-                            "language": "es",
-                            "value": "Logo Andora",
-                        }
-                    },
-                },
-                "heroImage": {
-                    "sourceUri": {
-                        "uri": "https://tuservidor.com/images/avatar_j_andora.png"
-                    },
-                    "contentDescription": {
-                        "defaultValue": {
-                            "language": "es",
-                            "value": "Avatar Jesus",
-                        }
-                    },
-                },
-                "header": {
-                    "defaultValue": {"language": "es", "value": "Jesus Montaño"}
-                },
-                "subheader": {
-                    "defaultValue": {
-                        "language": "es",
-                        "value": "Matrícula: #22",
-                    }
-                },
-                "textModulesData": [{
-                    "header": "INSTRUCCIÓN",
-                    "body": "Presenta este pase al ingresar",
-                    "id": "instruccion_ingreso",
-                }],
-                "barcode": {
-                    "type": "QR_CODE",
-                    # Se convierte tu diccionario JSON a una cadena compacta de texto
-                    "value": json.dumps(contenido_qr, separators=(",", ":")),
-                    "alternateText": "Matrícula #22",
-                },
-            }]
-        },
-    }
-
-    # 3. Firmar digitalmente el JSON para convertirlo en JWT
-    signer = google.auth.crypt.RSASigner.from_service_account_file(
-        CREDENTIALS_FILE
-    )
-    token = google.auth.jwt.encode(signer, tu_json_personalizado)
-
-    # Crear el enlace final de Google Wallet
-    enlace_wallet = f"https://pay.google.com/gp/v/save/{token}"
-    return enlace_wallet
-
-
-if __name__ == "__main__":
-    print("Firmando tu JSON personalizado y generando el enlace de Wallet...")
-    enlace_final = firmar_json_a_jwt()
-    print(f"Enlace generado con éxito: {enlace_final}")
-
-    # Mensaje que se enviará por WhatsApp
-    mensaje = (
-        "¡Hola Jesus! Aquí tienes tu pase de acceso exclusivo de Andora.\n\n"
-        "Haz clic en el siguiente enlace para agregarlo a tu Google Wallet:\n"
-        f"{enlace_final}"
-    )
-
-    print(
-        "Lanzando WhatsApp Web mediante pywhatkit para enviar el mensaje con tu"
-        " diseño..."
-    )
-
-    # Envía el mensaje de forma inmediata
-    pwk.sendwhatmsg_instantly(
-        phone_no=DESTINATARIO, message=mensaje, wait_time=15, tab_close=True
-    )
-
-    print(
-        "¡Proceso finalizado! Revisa que WhatsApp Web haya enviado el mensaje con"
-        " tu pase personalizado y el QR configurado."
-    )
+    print("🚀 Mensaje procesado con éxito.")
+else:
+    print(f"❌ Error al consultar PokéAPI: {respuesta.status_code}")
